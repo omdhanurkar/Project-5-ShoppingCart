@@ -1,75 +1,91 @@
-const userModel = require("../models/userModel") 
-const mongoose = require("mongoose")
-const bcrypt = require("bcrypt")
+const userModel = require("../models/userModel")
+const check = require("../utility/validator")
+const bcrypt = require("bcrypt");
+const aws = require("aws-sdk")
 
+//=============================================configure AWS===============================================================
+aws.config.update({
+    accessKeyId: "AKIAY3L35MCRUJ6WPO6J",
+    secretAccessKey: "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",
+    region: "ap-south-1"
+});
+let uploadFile = async (file) => {
+    return new Promise(function (resolve, reject) {
+        // this function will upload file to aws and return the link
+        let s3 = new aws.S3({ apiVersion: '2006-03-01' });
 
+        var uploadParams = {
+            ACL: "public-read",
+            Bucket: "classroom-training-bucket",
+            Key: "abc/" + file.originalname,
+            Body: file.buffer
+        }
+        s3.upload(uploadParams, function (err, data) {
+            if (err) {
+                return reject({ "error": err.message })
+            }
+            console.log("file uploaded succesfully")
+            return resolve(data.Location)
+        })
+    })
+}
+//==================================================create user===============================================================================
 
-
-//========================Create user======================
 const createUser = async function (req, res) {
     try {
-        const data = req.body;
-        let{fname,lname,email,photoimage,phone,password,address}=data
-       
+        const data = req.body
+        let { fname, lname, email, phone, password, address } = data
 
-        if (Object.keys(data).length == 0) {
-            return res.status(400).send({ status: false, message: "Body should not be empty" })
-        }
+        const files = req.files
 
-        
-        if (!isValid(fname)) return res.status(400).send({ status: false, message: "name is mandatory in the request" })
-        if (!nameData.match(/^(?![\. ])[a-zA-Z\. ]+(?<! )$/)) return res.status(400).send({ status: false, message: "name should be in alphabets" })
+        if (!fname) { return res.status(400).send({ status: false, message: "Fname is mandatory" }) };
+        if (!check.isValidFname) { return res.status(400).send({ status: false, message: "Fname should be in Alphabets" }) };
+        if (!lname) { return res.status(400).send({ status: false, message: "Lname is mandatory" }) };
+        if (!check.isValidLname) { return res.status(400).send({ status: false, message: "Lname should be in Alphabets" }) };
+        if (!email) { return res.status(400).send({ status: false, message: "email is mandatory" }) };
+        if (!check.isVAlidEmail) { return res.status(400).send({ status: false, message: "Email should be valid" }) };
+        if (!password) { return res.status(400).send({ status: false, message: "Password is mandatory" }) };
+        if (!check.isValidPassword) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
+        if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
+        if (!check.isValidPhone) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
+        if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
+        // if (!address) return res.status(400).send({ status: false, Message: "Address is mandatory" })
 
-       
-        if (!isValid(lname)) return res.status(400).send({ status: false, message: "name is mandatory in the request" })
-        if (!nameData.match(/^(?![\. ])[a-zA-Z\. ]+(?<! )$/)) return res.status(400).send({ status: false, message: "name should be in alphabets" })
+        // let { shipping, billing } = address
 
-        
-        if (!isValid(phone)) return res.status(400).send({ status: false, message: "phone number is mandatory in the request" })
-        if (!phone.match(/^((0091)|(\+91)|0?)[6789]{1}\d{9}$/)) return res.status(400).send({ status: false, message: "phone number should be of 10 digits" })
+        // if (!shipping) return res.status(400).send({ status: false, Message: "shipping address is madatory" })
+        // if (!(shipping.street)) return res.status(400).send({ status: false, Message: "shipping street is madatory" });
+        // if (!check.isValidStreet.shipping.street) return res.status(400).send({ status: false, Message: "Provide valid shipping street" });
+        // if (!(shipping.city)) return res.status(400).send({ status: false, Message: " shipping city is madatory" });
+        // if (!(shipping.pincode)) return res.status(400).send({ status: false, Message: "shopping pincode is madatory" });
+        // if (!check.isValidPincode(shipping.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid shipping pincode" });
 
-    
-        if (!isValid(email)) return res.status(400).send({ status: false, message: "email is mandatory in the request" })
-        if (!emailData.match(/^([a-zA-Z0-9_.]+@[a-z]+\.[a-z]{2,3})?$/)) return res.send({ status: false, message: "email is not valid" });
-        
-        let uniquePhone = await userModel.findOne({ phone: phone })
-        if (uniquePhone) return res.status(400).send({ status: false, message: "phone no. Already Exists." })
-        
-        let uniqueEmail = await userModel.findOne({ email: emailData })
-        if (uniqueEmail) return res.status(400).send({ status: false, message: "email Id Already Exists." })
-
-
-        const passwordData = data.password;
-        if (!isValid(passwordData)) return res.status(400).send({ status: false, message: "password is mandatory in the request" })
-    
-        if (!isValidPassword(passwordData)) return res.status(406).send({status: false, message: "enter valid password"})
-        let uniquePassword = await userModel.findOne({ password: passwordData })
-        if (uniquePassword) return res.status(400).send({ status: false, message: "password Already Exists." })
+        // if (!(billing)) return res.status(400).send({ status: false, Message: "billing address is madatory" });
+        // if (!(billing.street)) return res.status(400).send({ status: false, Message: "billing street is madatory" });
+        // if (!check.isValidStreet.billing.street) return res.status(400).send({ status: false, Message: "Provide valid billing street" });
+        // if (!(billing.city)) return res.status(400).send({ status: false, Message: "billing city is madatory" });
+        // if (!billing.pincode) return res.status(400).send({ status: false, Message: "billing pincode is madatory" });
+        // if (!check.isValidPincode(billing.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid billing pincode" });
 
 
-        address = data.addres
-            if (Object.keys(address).length == 0) {
-                return res.status(400).send({ status: false, message: "Address should not be empty" })
-            }
-    
-    
+        let usedEmail = await userModel.findOne({ email });
+        if (usedEmail) return res.status(400).send({ status: false, Message: "This email is already registered" });
 
-            if (!isValid(address.street)) return res.status(400).send({ status: false, message: "please enter street " })
-            if (!isValid(address.city)) return res.status(400).send({ status: false, message: "please enter city" })
-            if (!isValid(address.pincode)) return res.status(400).send({ status: false, message: "please enter pincode" })
-            if (address.pincode) {
+        let usedPhone = await userModel.findOne({ phone });
+        if (usedPhone) return res.status(400).send({ status: false, Message: "This Phone is already registered" });
 
-                if (!(/^[1-9][0-9]{5}$/).test(address.pincode)) return res.status(400).send({ status: false, message: "please enter valied pincode " })
-            }
+        if (!files && files.length > 0) { return res.status(400).send({ status: false, message: "ProfileImage is mandatory" }) };
+        let uploadedFileURL = await uploadFile(files[0])
+        data.uploadedFileURL = uploadedFileURL
 
-           
+        const encryptedPassword = await bcrypt.hash(password, 10)
+        const userDetails = { fname, lname, email, phone, profileImage: uploadedFileURL, password: encryptedPassword * /, address: addressObject */ }
 
-        let savedData = await userModel.create(data);
+        const newUser = await userModel.create(userDetails);
+        return res.status(201).send({ status: true, message: "User created successfully", data: newUser });
 
-        res.status(201).send({ status: true, message: "Success", data: savedData })
-
-    } catch (error) {
-        console.log(error); res.status(500).send({ status: false, message: error.message });
-
+    } catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
     }
 }
+module.exports = { createUser }
