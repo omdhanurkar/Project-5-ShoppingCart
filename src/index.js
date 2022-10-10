@@ -1,24 +1,27 @@
 const express = require('express');
 const route = require('./routes/route.js');
-const mongoose = require('mongoose');
+const  mongoose  = require('mongoose');
+require('dotenv').config();
 const app = express();
+const multer = require("multer");
+const { AppConfig } = require('aws-sdk');
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
+app.use(multer().any());
 
-
-mongoose.connect("mongodb+srv://Group48Database:zTjytU6VyO5vU2Zu@group48database.8dzrzxi.mongodb.net/test", {
+mongoose.connect(process.env.DB, {
     useNewUrlParser: true
 })
-    .then(() => console.log("MongoDb is connected"))
-    .catch(err => console.log(err))
+.then( () => console.log("MongoDb is connected"))
+.catch ( err => console.log(err) )
 
-app.use('/', route); 
+app.use('/', route);
 
-app.use((req, res) => {
-    return res.status(400).send({ status: false, message: "End point is incorrect" })
-});
+//----------handling wrong api edge case--------------------------------------------
+app.use((req, res, next) => {
+    res.status(400).send({ status: false, error: "URL is wrong" });
+})
 
-app.listen(process.env.PORT || 3000, function () {
-    console.log('Express app running on port ' + (process.env.PORT || 3000))
+app.listen(process.env.PORT , () => {
+    console.log(`Express app running on port ${process.env.PORT}`)
 });
