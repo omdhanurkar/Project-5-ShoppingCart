@@ -79,7 +79,7 @@ const createUser = async function (req, res) {
         data.uploadedFileURL = uploadedFileURL
 
         const encryptedPassword = await bcrypt.hash(password, 10)
-        const userDetails = { fname, lname, email, phone, profileImage: uploadedFileURL, password: encryptedPassword * /, address: addressObject */ }
+        const userDetails = { fname, lname, email, phone, profileImage: uploadedFileURL, password: encryptedPassword }
 
         const newUser = await userModel.create(userDetails);
         return res.status(201).send({ status: true, message: "User created successfully", data: newUser });

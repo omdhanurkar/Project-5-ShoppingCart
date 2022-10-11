@@ -1,15 +1,14 @@
 const express = require('express');
 const route = require('./routes/route.js');
 const  mongoose  = require('mongoose');
-require('dotenv').config();
 const app = express();
 const multer = require("multer");
-const { AppConfig } = require('aws-sdk');
+
 
 app.use(express.json());
 app.use(multer().any());
 
-mongoose.connect(process.env.DB, {
+mongoose.connect("mongodb+srv://Group48Database:zTjytU6VyO5vU2Zu@group48database.8dzrzxi.mongodb.net/Group48Database", {
     useNewUrlParser: true
 })
 .then( () => console.log("MongoDb is connected"))
@@ -22,6 +21,6 @@ app.use((req, res, next) => {
     res.status(400).send({ status: false, error: "URL is wrong" });
 })
 
-app.listen(process.env.PORT , () => {
-    console.log(`Express app running on port ${process.env.PORT}`)
+app.listen(process.env.PORT || 3000, function () {
+    console.log('Express app running on port ' + (process.env.PORT || 3000))
 });
