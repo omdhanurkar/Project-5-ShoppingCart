@@ -119,7 +119,7 @@ const userLogin = async function (req, res) {
         // using jwt for creating token
         let token = jwt.sign(
             {
-                userId: user._id,
+                userId: user._id.toString(),
                 exp: Math.floor(Date.now() / 1000) + (60 * 60),
                 iat: new Date().getTime()
             },
@@ -145,7 +145,6 @@ const getUser = async function (req, res) {
         if (!user) {
             return res.status(404).send({ status: false, message: "user not found" })
         }
-
 
         res.status(200).send({ status: true, message: 'User profile details', data: user })
     }
