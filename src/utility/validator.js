@@ -11,30 +11,25 @@ const isValidreqbody = function (body) {
     return Object.keys(body).length > 0
 }
 
-const isValidObjectId =function(userId){
-    return mongoose.Types.ObjectId.isValid(userId);
+const isValidObjectId =function(ObjectId){
+    return mongoose.Types.ObjectId.isValid(ObjectId);
 }
 
-//------------------------------- Fname regex --------------------------------------------//
+//------------------------------- name regex --------------------------------------------//
 
-const isValidFname = function (name) {
-    return /^[a-zA-Z .]{2,30}$/.test(name);
-};
-//------------------------------- Lname regex --------------------------------------------//
-
-const isValidLname = function (name) {
-    return /^[a-zA-Z ]{2,30}$/.test(name);
+const isValidname = function (name) {
+    return /^[A-Za-z]{1,35}/.test(name);
 };
 //------------------------------- email regex --------------------------------------------//
 
 const isVAlidEmail = function (email) {
-    return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/).test(email)
+    return (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/).test(email)
 }
 //------------------------------- password regex --------------------------------------------//
 
 
 const isValidPassword = function (pass) {
-    return /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,15}$/.test(pass);
+    return /^.{8,15}$/.test(pass);
 };
 
 //------------------------------- phone regex --------------------------------------------//
@@ -57,8 +52,7 @@ const isValidPincode = function (num) {
 
 module.exports = {
     isValid,
-    isValidFname,
-    isValidLname,
+    isValidname,
     isValidStreet,
     isValidPassword,
     isVAlidEmail,

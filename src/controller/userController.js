@@ -40,15 +40,15 @@ const createUser = async function (req, res) {
         const files = req.files
 
         if (!fname) { return res.status(400).send({ status: false, message: "Fname is mandatory" }) };
-        if (!check.isValidFname) { return res.status(400).send({ status: false, message: "Fname should be in Alphabets" }) };
+        if (!check.isValidname(fname)) { return res.status(400).send({ status: false, message: "Fname should be in Alphabets" }) };
         if (!lname) { return res.status(400).send({ status: false, message: "Lname is mandatory" }) };
-        if (check.isValidLname) { return res.status(400).send({ status: false, message: "Lname should be in Alphabets" }) };
+        if (!check.isValidname(lname)) { return res.status(400).send({ status: false, message: "Lname should be in Alphabets" }) };
         if (!email) { return res.status(400).send({ status: false, message: "email is mandatory" }) };
-        if (check.isVAlidEmail) { return res.status(400).send({ status: false, message: "Email should be valid" }) };
+        if (!check.isVAlidEmail(email)) { return res.status(400).send({ status: false, message: "Email should be valid" }) };
         if (!password) { return res.status(400).send({ status: false, message: "Password is mandatory" }) };
-        if (check.isValidPassword) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
+        if (!check.isValidPassword(password)) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
         if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
-        if (check.isValidPhone) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
+        if (!check.isValidPhone(phone)) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
         if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
         if (!address) return res.status(400).send({ status: false, Message: "Address is mandatory" })
 
