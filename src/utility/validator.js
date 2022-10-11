@@ -7,6 +7,13 @@ const isValid = function (value) {
     return true;
 };
 
+const isValidreqbody = function (body) {
+    return Object.keys(body).length > 0
+}
+
+const isValidObjectId =function(userId){
+    return mongoose.Types.ObjectId.isValid(userId);
+}
 
 //------------------------------- Fname regex --------------------------------------------//
 
@@ -56,6 +63,8 @@ module.exports = {
     isValidPassword,
     isVAlidEmail,
     isValidPhone,
-    isValidPincode
+    isValidPincode,
+    isValidreqbody,
+    isValidObjectId
 
 }

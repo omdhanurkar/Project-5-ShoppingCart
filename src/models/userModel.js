@@ -13,19 +13,19 @@ const userSchema = new mongoose.Schema({
 
     password: { type: String, required: true },
 
-    // address: {
-    //     shipping: {
-    //         street: { type: String, required: true },
-    //         city: { type: String, required: true },
-    //         pincode: { type: Number, required: true }
-    //     },
+    address: {
+        shipping: {
+            street: { type: String, required: true },
+            city: { type: String, required: true },
+            pincode: { type: Number, required: true }
+        },
 
-    //     billing: {
-    //         street: { type: String, required: true },
-    //         city: { type: String, required: true },
-    //         pincode: { type: Number, required: true }
-    //     }
-    // }
+        billing: {
+            street: { type: String, required: true },
+            city: { type: String, required: true },
+            pincode: { type: Number, required: true }
+        }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('user', userSchema)
