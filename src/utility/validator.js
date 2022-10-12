@@ -18,7 +18,7 @@ const isValidObjectId = function (ObjectId) {
 //------------------------------- name regex --------------------------------------------//
 
 const isValidname = function (name) {
-    return /^[A-Za-z]{1,35}/.test(name);
+    return /^[a-z ,.'-]+$/i.test(name);
 };
 //------------------------------- email regex --------------------------------------------//
 
@@ -51,9 +51,14 @@ const isValidPincode = function (num) {
 };
 
 const isValidImage = function (files) {
-    return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(files[0])
+    return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(files[0]);
 
 }
+
+const isvalidNumber = function (value) {
+    return /^(?:0|[1-9]\d*)(?:\.(?!.*000)\d+)?$/.test(value);
+}
+
 module.exports = {
     isValid,
     isValidname,
@@ -64,6 +69,8 @@ module.exports = {
     isValidPincode,
     isValidreqbody,
     isValidObjectId,
-    isValidImage
+    isValidImage,
+    isvalidNumber
+
 
 }
