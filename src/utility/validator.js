@@ -11,7 +11,7 @@ const isValidreqbody = function (body) {
     return Object.keys(body).length > 0
 }
 
-const isValidObjectId =function(ObjectId){
+const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId);
 }
 
@@ -23,7 +23,8 @@ const isValidname = function (name) {
 //------------------------------- email regex --------------------------------------------//
 
 const isVAlidEmail = function (email) {
-    return (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/).test(email)
+    return (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    ).test(email)
 }
 //------------------------------- password regex --------------------------------------------//
 
@@ -49,7 +50,10 @@ const isValidPincode = function (num) {
     return /^[1-9][0-9]{5}$/.test(num);
 };
 
+const isValidImage = function (files) {
+    return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(files[0])
 
+}
 module.exports = {
     isValid,
     isValidname,
@@ -59,6 +63,7 @@ module.exports = {
     isValidPhone,
     isValidPincode,
     isValidreqbody,
-    isValidObjectId
+    isValidObjectId,
+    isValidImage
 
 }
