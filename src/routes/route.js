@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { createUser, userLogin, getUser, updateUser } = require('../controller/userController')
-const{createProduct}=require('../controller/productController')
+const{createProduct, getProducts, getProductsById, ProductDeleteById, updateProduct}=require('../controller/productController')
 const { authentication, authorization } = require('../middleware/auth')
 
 
@@ -24,5 +24,12 @@ router.put("/user/:userId/profile",authentication,authorization ,updateUser)
 
 router.post("/products", createProduct)
 
+router.get("/products", getProducts)
+
+router.get("/products/:productId", getProductsById) 
+
+router.put("/products/:productId", updateProduct)
+
+router.delete("/products/:productId", ProductDeleteById)
 module.exports = router
 
