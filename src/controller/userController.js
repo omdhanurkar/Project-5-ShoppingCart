@@ -11,7 +11,7 @@ const createUser = async function (req, res) {
     try {
         const data = req.body
 
-        if(check.isValidRequestBody(data)) {return res.status(400).send({ status: false, message: "Please enter Data" })}
+        if(!check.isValidRequestBody(data)) {return res.status(400).send({ status: false, message: "Please enter Data" })}
 
         let { fname, lname, email, phone, password, address } = data
 
@@ -34,8 +34,9 @@ const createUser = async function (req, res) {
         let checkEmail = await userModel.findOne({ email });
         if (checkEmail) return res.status(400).send({ status: false, message: "This email is already registered" });
 
-        let checkPassword = await userModel.findOne({ phone });
-        if (checkPassword) return res.status(400).send({ status: false, message: "This Phone is already registered" });
+        let checkPhone = await userModel.findOne({ phone });
+        if (checkPhone) return res.status(400).send({ status: false, message: "This Phone is already registered" });
+
         const encryptedPassword = await bcrypt.hash(password, 10)
 
         if (files && files.length == 0)
@@ -132,10 +133,10 @@ const getUser = async function (req, res) {
             return res.status(404).send({ status: false, message: "user not found" })
         }
 
-        res.status(200).send({ status: true, message: 'User profile details', data: user })
+        return res.status(200).send({ status: true, message: 'User profile details', data: user })
     }
     catch (error) {
-        res.status(500).send({ status: false, message: error.message });
+       return res.status(500).send({ status: false, message: error.message });
     }
 }
 

@@ -15,13 +15,13 @@ const productSchema = new mongoose.Schema(
         isFreeShipping: { type: Boolean, default: false },
         productImage: { type: String, required: true },
         style: { type: String },
-        availableSizes:[
+        availableSizes:
         {
-            type: String,
+            type: [String],
             enum: ["S", "XS", "M", "X", "L", "XXL", "XL"],
             uppercase: true,
             trim: true
-        }],
+        },
 
         installments: { type: Number },
         deletedAt: { type: Date, default: null },

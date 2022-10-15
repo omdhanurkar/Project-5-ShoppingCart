@@ -9,7 +9,7 @@ const createProduct = async function (req, res) {
     try {
         let data = req.body
 
-        if (check.isValidRequestBody(data)) { return res.status(400).send({ status: false, message: "Please enter some Data" }) }
+        if (!check.isValidRequestBody(data)) { return res.status(400).send({ status: false, message: "Please enter some Data" }) }
 
         let { title, description, price, currencyId, currencyFormat,
             isFreeShipping, style, availableSizes, installments } = data
@@ -81,7 +81,7 @@ const getProducts = async function (req, res) {
         let queries = req.query;
 
         let getProducts = await productModel.find({ isDeleted: false })
-        if (Object.keys(queries).length == 0) return res.status(200).send({ status: true, message: 'Success', data: getProducts })
+        if (Object.keys(queries).length == 0) return res.status(200).send({ status: true, message:"enter some some data for get product" })
 
         if (getProducts.length == 0) {
             return res.status(404).send({ status: false, message: "No product found" })
@@ -227,7 +227,6 @@ const updateProduct = async function (req, res) {
                 return (check.isValid(sizes) && ["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes))
             });
             if (availableSizes.length == 0) return res.status(400).send({ status: false, message: "available sizes should be in valid format and should be  S, XS, M, X, L, XXL, XL", });
-
             obj.availableSizes = availableSizes
         }
 
@@ -272,15 +271,15 @@ const ProductDeleteById = async function (req, res) {
         if (!allProduct)
             return res.status(404).send({ status: false, message: "products not found with this Id" })
 
-        let isdelete = await productModel.findById({ _id: ProductDeleteById })
-        if (isdelete.isDeleted == true)
+        let checkProduct = await productModel.findById({ _id: ProductDeleteById })
+        if (checkProduct.isDeleted == true)
             return res.status(404).send({ status: false, message: "product is already deleted" })
 
         let checkData = await productModel.findByIdAndUpdate({ _id: ProductDeleteById }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true });
-        res.status(200).send({ status: true, message: "product deleted Successfully" });
+        return res.status(200).send({ status: true, message: "product deleted Successfully" });
 
     } catch (err) {
-        res.status(500).send({ status: false, error: err.message })
+        return res.status(500).send({ status: false, error: err.message })
     }
 }
 module.exports = { createProduct, getProducts, getProductsById, updateProduct, ProductDeleteById }
