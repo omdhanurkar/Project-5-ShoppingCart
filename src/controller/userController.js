@@ -1,40 +1,18 @@
 const userModel = require("../models/userModel")
 const check = require("../utility/validator")
 const bcrypt = require("bcrypt");
-const aws = require("aws-sdk")
 const jwt = require("jsonwebtoken")
+const { uploadFile } = require("./awsController")
 let saltRounds = 10
-//=============================================configure AWS===============================================================
-aws.config.update({
-    accessKeyId: "AKIAY3L35MCRUJ6WPO6J",
-    secretAccessKey: "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",
-    region: "ap-south-1"
-});
-let uploadFile = async (file) => {
-    return new Promise(function (resolve, reject) {
-        // this function will upload file to aws and return the link
-        let s3 = new aws.S3({ apiVersion: '2006-03-01' });
 
-        var uploadParams = {
-            ACL: "public-read",
-            Bucket: "classroom-training-bucket",
-            Key: "abc/" + file.originalname,
-            Body: file.buffer
-        }
-        s3.upload(uploadParams, function (err, data) {
-            if (err) {
-                return reject({ "error": err.message })
-            }
-            console.log("file uploaded succesfully")
-            return resolve(data.Location)
-        })
-    })
-}
 //==================================================create user===============================================================================
 
 const createUser = async function (req, res) {
     try {
         const data = req.body
+
+        if(check.isValidRequestBody(data)) {return res.status(400).send({ status: false, message: "Please enter Data" })}
+
         let { fname, lname, email, phone, password, address } = data
 
         const files = req.files
@@ -64,9 +42,7 @@ const createUser = async function (req, res) {
             return res
                 .status(400)
                 .send({ status: false, message: "Profile Image is required" });
-        else if (
-            !/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(files[0].originalname)
-        )
+        else if (!check.isValidImage(files[0].originalname))
             return res.status(400).send({
                 status: false,
                 message: "Profile Image is required as an Image format",
@@ -108,7 +84,7 @@ const userLogin = async function (req, res) {
         let data = req.body
 
         let { email, password } = data
-        if (!check.isValidreqbody(data)) return res.status(400).send({ status: false, message: "Please provide login details" })
+        if (!check.isValidRequestBody(data)) return res.status(400).send({ status: false, message: "Please provide login details" })
 
         if (!email) {
             return res.status(400).send({ status: false, message: "Email is required!!" })
@@ -136,10 +112,10 @@ const userLogin = async function (req, res) {
             "Project5-Group48"
         );
 
-        res.status(201).send({ status: true, message: "User login successfully", data: { userId: user._id, token: token } });
+        return res.status(200).send({ status: true, message: "User login successfully", data: { userId: user._id, token: token } });
     }
     catch (error) {
-        res.status(500).send({ status: false, message: error.message });
+        return res.status(500).send({ status: false, message: error.message });
     }
 }
 //================================================GetUser==================================================================================
@@ -168,14 +144,13 @@ const getUser = async function (req, res) {
 const updateUser = async function (req, res) {
     try {
         let userId = req.params.userId
-        if (!check.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Enter valid user Id" })
+
         const files = req.files
 
-        const userdata = JSON.parse(JSON.stringify(req.body));
+        let userdata = req.body
+        if (!check.isValidValues(userdata)) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+
         let { fname, lname, email, phone, password, address } = userdata;
-
-        if (!check.isValidreqbody(userdata)) return res.status(400).send({ status: false, message: "Enter data which you want to update" })
-
 
         if (!check.isValidname(fname)) {
             return res.status(400).send({ status: false, message: "Fname should be valid" })
@@ -188,50 +163,40 @@ const updateUser = async function (req, res) {
         }
         userdata.lname = lname
 
-
-        if (!check.isVAlidEmail(email)) { return res.status(400).send({ status: false, message: "Email should valid" }) };
-        let duplicateEmail = await userModel.findOne({ email: email })
-        if (duplicateEmail) return res.status(400).send({ status: false, message: "This email is already exists" });
-        userdata.email = email;
-
-        // if (!check.isValidPassword(password)) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
-        // const encryptedPassword = await bcrypt.hash(password, 10)
-        // userdata.password = encryptedPassword
+        if (email) {
+            if (!check.isVAlidEmail(email)) { return res.status(400).send({ status: false, message: "Email should valid" }) };
+            let duplicateEmail = await userModel.findOne({ email: email })
+            if (duplicateEmail) return res.status(400).send({ status: false, message: "This email is already exists" });
+            userdata.email = email;
+        }
 
         if (Object.keys(userdata).includes("password")) {
             if (password.length < 8 || password.length > 15) {
-                return res.status(400).send({
-                    status: false,
-                    message: "password length should be between 8 to 15",
-                });
+                return res.status(400).send({ status: false, message: "password length should be between 8 to 15", });
             }
             if (!check.isValidPassword(password)) {
-                return res
-                    .status(400)
-                    .send({ status: false, message: "Password is not valid " });
+                return res.status(400).send({ status: false, message: "Password is not valid " });
             }
             password = await bcrypt.hash(password, saltRounds);
             userdata.password = password;
         }
 
-
-        if ((!check.isValidPhone(phone))) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
-        let duplicatePhone = await userModel.findOne({ email: email })
-        if (duplicatePhone) return res.status(400).send({ status: false, message: "This phone number is already exists" });
-
-
-        if (Object.keys(userdata).includes("files")) {
-            if (files.length ==0) {
-                return res.status(400).send({
-                    status: false,
-                    message: "please select any file to upload",
-                });
-            }
-            userdata.profileImage = await uploadFile(files[0])
+        if (phone) {
+            if ((!check.isValidPhone(phone))) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
+            let duplicatePhone = await userModel.findOne({ email: email })
+            if (duplicatePhone) return res.status(400).send({ status: false, message: "This phone number is already exists" });
         }
+
+        if (files && files.length !== 0) {
+            if (!check.isValidImage(files[0].originalname))
+                return res.status(400).send({ status: false, message: "Profile Image is required only in Image format", });
+            userdata.profileImage = await uploadFile(files[0]);
+        }
+
 
         if (address) {
             userdata.address = JSON.parse(userdata.address)
+
             if (typeof userdata.address != "object") return res.status(400).send({ status: false, message: "Address should be in object format" })
             let { shipping, billing } = userdata.address
 
