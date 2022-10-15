@@ -18,7 +18,7 @@ router.post("/login", userLogin)
 
 router.get("/user/:userId/profile", authentication, getUser)
 
-router.put("/user/:userId/profile",authentication,authorization ,updateUser)
+router.put("/user/:userId/profile"/*,authentication,authorization*/ ,updateUser)
 
 //=====================productApis=============================================
 
@@ -30,6 +30,7 @@ router.get("/products/:productId", getProductsById)
 
 router.put("/products/:productId", updateProduct)
 
-router.delete("/products/:productId", ProductDeleteById)
+router.delete("/products/:productId", ProductDeleteById) 
+
 module.exports = router
 
