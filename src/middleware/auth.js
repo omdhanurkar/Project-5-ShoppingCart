@@ -1,7 +1,8 @@
 
 const jwt = require('jsonwebtoken')
 const mongoose = require("mongoose");
-//const userModel = require("../models/userModel")
+
+//===================================Authentication======================================================
 
 const authentication = (req, res, next) => {
     try {
@@ -21,6 +22,8 @@ const authentication = (req, res, next) => {
         res.status(500).send({ status: false, message: err.message })
     }
 }
+
+//===================================Authorization======================================================
 
 const authorization = async function (req, res, next) {
     try {
