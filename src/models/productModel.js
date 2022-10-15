@@ -13,17 +13,16 @@ const productSchema = new mongoose.Schema(
         },
         currencyFormat: { type: String, default: "₹" },
         isFreeShipping: { type: Boolean, default: false },
-        productImage: { type: String },
+        productImage: { type: String, required: true },
         style: { type: String },
-        availableSizes: [
-            {
-                type: String,
-                require: true,
-                enum: ["S", "XS", "M", "X", "L", "XXL", "XL"],
-                uppercase: true,
-                trim: true
-            },
-        ],
+        availableSizes:[
+        {
+            type: String,
+            enum: ["S", "XS", "M", "X", "L", "XXL", "XL"],
+            uppercase: true,
+            trim: true
+        }],
+
         installments: { type: Number },
         deletedAt: { type: Date, default: null },
         isDeleted: { type: Boolean, default: false },
