@@ -7,13 +7,30 @@ const isValid = function (value) {
     return true;
 };
 
-const isValidreqbody = function (body) {
-    return Object.keys(body).length > 0
+//------------------------------- requestBody validation --------------------------------------------//
+
+const isValidRequestBody = function (body) {
+    return Object.keys(body).length > 0
 }
+
+//------------------------------- ObjectId validation --------------------------------------------//
 
 const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId);
+
 }
+
+//------------------------------- keys values validation --------------------------------------------//
+
+const isValidValues = function (data) {
+    if (!data) return false;
+    if (Object.values(data).length == 0) return false;
+    if (Object.values(data).length > 0) {
+        const checkData = Object.values(data).filter((value) => value);
+        if (checkData.length == 0) return false;
+    }
+    return true;
+};
 
 //------------------------------- name regex --------------------------------------------//
 
@@ -49,11 +66,14 @@ const isValidStreet = function (value) {
 const isValidPincode = function (num) {
     return /^[1-9][0-9]{5}$/.test(num);
 };
+//------------------------------- Image regex --------------------------------------------//
 
-const isValidImage = function (files) {
-    return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(files[0]);
-
+const isValidImage = function (value) {
+    const r = /\.(gif|jpe?g|tiff?|png|webp|temp)$/
+    return r.test(value)
 }
+
+//------------------------------- Number regex --------------------------------------------//
 
 const isvalidNumber = function (value) {
     return /^(?:0|[1-9]\d*)(?:\.(?!.*000)\d+)?$/.test(value);
@@ -67,10 +87,11 @@ module.exports = {
     isVAlidEmail,
     isValidPhone,
     isValidPincode,
-    isValidreqbody,
+    isValidRequestBody,
     isValidObjectId,
     isValidImage,
-    isvalidNumber
+    isvalidNumber,
+    isValidValues
 
 
 }
