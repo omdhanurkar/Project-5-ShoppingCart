@@ -18,7 +18,7 @@ app.use('/', route);
 
 //----------handling wrong api edge case--------------------------------------------
 app.use((req, res, next) => {
-    res.status(400).send({ status: false, error: "URL is wrong" });
+    res.status(400).send({ status: false, error: "Endpoint is not Correct" }); 
 })
 
 
