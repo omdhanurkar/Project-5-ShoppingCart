@@ -3,7 +3,7 @@ const check = require("../utility/validator")
 const { uploadFile } = require("./awsController")
 const mongoose = require("mongoose")
 
-//=======================================================Create Product=========================================================================================================
+//==============================================Create Product========================================================================
 
 const createProduct = async function (req, res) {
     try {
@@ -75,13 +75,15 @@ const createProduct = async function (req, res) {
         return res.status(500).send({ status: false, error: err.message })
     }
 }
-//=================================================================Get product=================================================================================================================================
+
+//==============================================Get product==========================================================
+
 const getProducts = async function (req, res) {
     try {
         let queries = req.query;
 
         let getProducts = await productModel.find({ isDeleted: false })
-        if (Object.keys(queries).length == 0) return res.status(200).send({ status: true, message:"enter some some data for get product" })
+        if (Object.keys(queries).length == 0) return res.status(200).send({ status: true, message: "enter some some data for get product" })
 
         if (getProducts.length == 0) {
             return res.status(404).send({ status: false, message: "No product found" })
@@ -104,8 +106,10 @@ const getProducts = async function (req, res) {
 
             }
             if (queries.size) {
-                let getbySize = await productModel.find({ isDeleted: false, title: { $regex: queries.size } })
+                let sizes = queries.size.split(',')
+                let getbySize = await productModel.find({ isDeleted: false, availableSizes: { $in: sizes  } })
                 return getbySize.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: getbySize })
+
 
             }
 
@@ -114,19 +118,14 @@ const getProducts = async function (req, res) {
                 return getbyName.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: getbyName })
 
             }
-            if (queries.price) {
-                let getbyprice = await productModel.find({ isDeleted: false, title: { $regex: queries.price } })
-                return getbyprice.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: getbyprice })
-
-            }
 
             if (queries.priceGreaterThan) {
-                let getbyPriceGt = await productModel.find({ price: { $gte: queries.priceGreaterThan } })
+                let getbyPriceGt = await productModel.find({ price: { $gt: queries.priceGreaterThan } })
                 return getbyPriceGt.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: getbyPriceGt })
 
             }
             if (queries.priceLessThan) {
-                let getbyPriceLt = await productModel.find({ price: { $lte: queries.priceLessThan } })
+                let getbyPriceLt = await productModel.find({ price: { $lt: queries.priceLessThan } })
                 return getbyPriceLt.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: getbyPriceLt })
             }
             let priceSort = queries.priceSort
@@ -141,7 +140,7 @@ const getProducts = async function (req, res) {
     }
 }
 
-//=================================================================Get product by ID=================================================================================================================================
+//===============================================Get product by ID================================================================
 
 const getProductsById = async function (req, res) {
     try {
@@ -163,23 +162,34 @@ const getProductsById = async function (req, res) {
     }
 }
 
-//=================================================================Update Product=================================================================================================================================
+//========================================Update Product========================================================
 
 const updateProduct = async function (req, res) {
     try {
-        let data = req.body
-
-        if (!check.isValidRequestBody(data)) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
-
         let productId = req.params.productId
-        if (!mongoose.isValidObjectId(productId)) {
-            return res.status(400).send({ status: false, message: " invalid userId " })
+        if (!check.isValidObjectId(productId)) {
+            return res.status(400).send({ status: false, message: " invalid Product Id" })
         }
+
         let products = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!products) { return res.status(404).send({ status: false, message: "No product Found" }) }
 
+        let data = req.body
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = data
+
+        let files = req.files
         let obj = {}
+
+        if((Object.keys(data).length == 0) && (req.files.length == 0)) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+        
+        if (files && files.length > 0) {    
+            if (!check.isValidImage(files[0].originalname)) return res.status(400).send({ status: false, message: "Profile Image is required only in Image format", });
+            let url = await uploadFile(files[0])
+            obj["productImage"] = url        
+        }
+
+        // if (!check.isValidRequestBody(data)) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+
         if (title) {
             if (!check.isValid(title)) return res.status(400).send({ status: false, message: "please write title in correct way" })
             let titleInfo = await productModel.findOne({ title: title })
@@ -188,7 +198,8 @@ const updateProduct = async function (req, res) {
             }
             obj.title = title
         }
-        if (description) {
+        
+        if (Object.values(req.body).includes(description)) {
             if (!check.isValid(description)) return res.status(400).send({ status: false, message: "please write description in correct way" })
             obj.description = description
         }
@@ -235,29 +246,18 @@ const updateProduct = async function (req, res) {
             if (installments <= 0) return res.status(400).send({ status: false, message: "please suitable installments " })
             obj.installments = installments
         }
-
-        let files = req.files
-        if (files) {
-            if (files && files.length !== 0) {
-                if (!check.isValidImage(files[0].originalname))
-                    return res.status(400).send({ status: false, message: "Profile Image is required only in Image format", });
-                obj.profileImage = await uploadFile(files[0]);
-            }
-        }
-
-
+        
         let updatedProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false },
             obj,
             { new: true })
         return res.status(200).send({ status: true, message: 'Success', data: updatedProduct })
-    }
-
-    catch (error) {
+    
+    }catch (error) {
         res.status(500).send({ status: false, error: error.message })
     }
 }
 
-//=================================================================Delete ptoduct=================================================================================================================================
+//=============================================Delete ptoduct====================================================================
 
 
 const ProductDeleteById = async function (req, res) {
@@ -282,4 +282,5 @@ const ProductDeleteById = async function (req, res) {
         return res.status(500).send({ status: false, error: err.message })
     }
 }
+
 module.exports = { createProduct, getProducts, getProductsById, updateProduct, ProductDeleteById }

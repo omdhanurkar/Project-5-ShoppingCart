@@ -1,4 +1,3 @@
-
 const jwt = require('jsonwebtoken')
 const mongoose = require("mongoose");
 
@@ -29,7 +28,7 @@ const authorization = async function (req, res, next) {
     try {
         let userId = req.params.userId
         if (!mongoose.isValidObjectId(userId)) {
-            return res.status(400).send({ status: false, msg: 'Please enter correct userId Id' })
+            return res.status(400).send({ status: false, msg: 'Please enter correct user Id' })
         }
         let userLoggedIn = req.decodedToken.userId
         if (userId != userLoggedIn) {
@@ -41,7 +40,5 @@ const authorization = async function (req, res, next) {
         return res.status(500).send({ status: false, message: error.message })
     }
 }
-
-
 
 module.exports = { authentication, authorization }

@@ -5,13 +5,12 @@ const jwt = require("jsonwebtoken")
 const { uploadFile } = require("./awsController")
 let saltRounds = 10
 
-//==================================================create user===============================================================================
+//=====================================CREATE USER===============================================================
 
 const createUser = async function (req, res) {
     try {
         const data = req.body
-
-        if(!check.isValidRequestBody(data)) {return res.status(400).send({ status: false, message: "Please enter Data" })}
+        if (!check.isValidRequestBody(data)) { return res.status(400).send({ status: false, message: "Please enter data to create user" }) }
 
         let { fname, lname, email, phone, password, address } = data
 
@@ -21,23 +20,20 @@ const createUser = async function (req, res) {
         if (!check.isValidname(fname)) { return res.status(400).send({ status: false, message: "Fname should be in Alphabets" }) };
         if (!lname) { return res.status(400).send({ status: false, message: "Lname is mandatory" }) };
         if (!check.isValidname(lname)) { return res.status(400).send({ status: false, message: "Lname should be in Alphabets" }) };
+
         if (!email) { return res.status(400).send({ status: false, message: "email is mandatory" }) };
-        if (!check.isVAlidEmail(email)) { return res.status(400).send({ status: false, message: "Email should be valid" }) };
-        if (!password) { return res.status(400).send({ status: false, message: "Password is mandatory" }) };
-        if (!check.isValidPassword(password)) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
-        if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
-        if (!check.isValidPhone(phone)) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
-        if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
-        if (!address) return res.status(400).send({ status: false, message: "Address is mandatory" })
-
-
+        if (!check.isVAlidEmail(email)) { return res.status(400).send({ status: false, message: "Email should be valid" }) };        
         let checkEmail = await userModel.findOne({ email });
         if (checkEmail) return res.status(400).send({ status: false, message: "This email is already registered" });
 
+        if (!password) { return res.status(400).send({ status: false, message: "Password is mandatory" }) };
+        if (!check.isValidPassword(password)) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
+        const encryptedPassword = await bcrypt.hash(password, 10)
+        
+        if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
+        if (!check.isValidPhone(phone)) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
         let checkPhone = await userModel.findOne({ phone });
         if (checkPhone) return res.status(400).send({ status: false, message: "This Phone is already registered" });
-
-        const encryptedPassword = await bcrypt.hash(password, 10)
 
         if (files && files.length == 0)
             return res
@@ -50,6 +46,7 @@ const createUser = async function (req, res) {
             });
         else data.profileImage = await uploadFile(files[0]);
 
+        if (!address) return res.status(400).send({ status: false, message: "Address is mandatory" })
         address = JSON.parse(data.address)
 
         if (!address.shipping) return res.status(400).send({ status: false, message: "shipping address is madatory" })
@@ -77,7 +74,7 @@ const createUser = async function (req, res) {
     }
 }
 
-//===================================================loginuser================================================================================
+//======================================LOGIN USER===============================================================
 
 const userLogin = async function (req, res) {
     try {
@@ -119,7 +116,9 @@ const userLogin = async function (req, res) {
         return res.status(500).send({ status: false, message: error.message });
     }
 }
-//================================================GetUser==================================================================================
+
+//=======================================GET USER===============================================================
+
 const getUser = async function (req, res) {
     try {
         let userId = req.params.userId
@@ -136,28 +135,29 @@ const getUser = async function (req, res) {
         return res.status(200).send({ status: true, message: 'User profile details', data: user })
     }
     catch (error) {
-       return res.status(500).send({ status: false, message: error.message });
+        return res.status(500).send({ status: false, message: error.message });
     }
 }
 
-//==============================================update=====================================================================================
+//========================================UPDATE USER===========================================================
 
 const updateUser = async function (req, res) {
     try {
         let userId = req.params.userId
 
-        const files = req.files
-
         let userdata = req.body
-        if (!check.isValidValues(userdata)) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+        if(Object.keys(userdata).length == 0 && req.files.length == 0) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+
+        // if (!check.isValidValues(userdata) || Object.keys(req.files).length > 0) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
 
         let { fname, lname, email, phone, password, address } = userdata;
+        
+        const files = req.files
 
         if (!check.isValidname(fname)) {
             return res.status(400).send({ status: false, message: "Fname should be valid" })
         }
         userdata.fname = fname
-
 
         if (!check.isValidname(fname)) {
             return res.status(400).send({ status: false, message: "lname should be valid" })
@@ -184,16 +184,15 @@ const updateUser = async function (req, res) {
 
         if (phone) {
             if ((!check.isValidPhone(phone))) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
-            let duplicatePhone = await userModel.findOne({ email: email })
+            let duplicatePhone = await userModel.findOne({ phone: phone })
             if (duplicatePhone) return res.status(400).send({ status: false, message: "This phone number is already exists" });
         }
 
-        if (files && files.length !== 0) {
+        if (files && files.length != 0) {
             if (!check.isValidImage(files[0].originalname))
                 return res.status(400).send({ status: false, message: "Profile Image is required only in Image format", });
             userdata.profileImage = await uploadFile(files[0]);
         }
-
 
         if (address) {
             userdata.address = JSON.parse(userdata.address)
@@ -223,15 +222,11 @@ const updateUser = async function (req, res) {
         }
 
         let updateUserData = await userModel.findOneAndUpdate({ _id: userId }, userdata, { new: true })
-
         res.status(200).send({ status: true, message: 'User profile updated', data: updateUserData })
 
-    }
-
-    catch (error) {
+    }catch (error) {
         res.status(500).send({ status: false, message: error.message });
     }
 }
-
 
 module.exports = { createUser, userLogin, getUser, updateUser }
