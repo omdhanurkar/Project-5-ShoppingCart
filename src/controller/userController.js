@@ -146,7 +146,7 @@ const updateUser = async function (req, res) {
         let userId = req.params.userId
 
         let userdata = req.body
-        if(Object.keys(userdata).length == 0 && req.files.length == 0) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+        if(Object.keys(userdata).length == 0 && files == undefined) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
 
         // if (!check.isValidValues(userdata) || Object.keys(req.files).length > 0) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
 

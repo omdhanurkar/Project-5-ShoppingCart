@@ -107,7 +107,7 @@ const getProducts = async function (req, res) {
             }
             if (queries.size) {
                 let sizes = queries.size.split(',')
-                let getbySize = await productModel.find({ isDeleted: false, availableSizes: { $in: sizes  } })
+                let getbySize = await productModel.find({ isDeleted: false, availableSizes: { $in: sizes } })
                 return getbySize.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: getbySize })
 
 
@@ -180,12 +180,12 @@ const updateProduct = async function (req, res) {
         let files = req.files
         let obj = {}
 
-        if((Object.keys(data).length == 0) && (req.files.length == 0)) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
-        
-        if (files && files.length > 0) {    
+        if ((Object.keys(data).length == 0) && files == undefined) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+
+        if (files && files.length > 0) {
             if (!check.isValidImage(files[0].originalname)) return res.status(400).send({ status: false, message: "Profile Image is required only in Image format", });
             let url = await uploadFile(files[0])
-            obj["productImage"] = url        
+            obj["productImage"] = url
         }
 
         // if (!check.isValidRequestBody(data)) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
@@ -198,7 +198,7 @@ const updateProduct = async function (req, res) {
             }
             obj.title = title
         }
-        
+
         if (Object.values(req.body).includes(description)) {
             if (!check.isValid(description)) return res.status(400).send({ status: false, message: "please write description in correct way" })
             obj.description = description
@@ -246,13 +246,13 @@ const updateProduct = async function (req, res) {
             if (installments <= 0) return res.status(400).send({ status: false, message: "please suitable installments " })
             obj.installments = installments
         }
-        
+
         let updatedProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false },
             obj,
             { new: true })
         return res.status(200).send({ status: true, message: 'Success', data: updatedProduct })
-    
-    }catch (error) {
+
+    } catch (error) {
         res.status(500).send({ status: false, error: error.message })
     }
 }
