@@ -3,7 +3,8 @@ const router = express.Router();
 const { createUser, userLogin, getUser, updateUser } = require('../controller/userController')
 const { createProduct, getProducts, getProductsById, ProductDeleteById, updateProduct } = require('../controller/productController')
 const { authentication, authorization } = require('../middleware/auth')
-const { createCart , updateCart, getCartById, deleteCart} = require('../controller/cartController')
+const { createCart, updateCart, getCartById, deleteCart } = require('../controller/cartController')
+const { createOrder, updateOrder } = require('../controller/orderController')
 
 //=======================test Api=========================
 
@@ -35,12 +36,18 @@ router.delete("/products/:productId", ProductDeleteById)
 
 //=====================cart Api's=============================================
 
-router.post("/users/:userId/cart",  createCart)
+router.post("/users/:userId/cart", authentication, authorization, createCart)
 
-router.put("/users/:userId/cart", updateCart)
+router.put("/users/:userId/cart", authentication, authorization, updateCart)
 
-router.get("/users/:userId/cart", getCartById)
+router.get("/users/:userId/cart", authentication, authorization, getCartById)
 
-router.delete("/users/:userId/cart", deleteCart)
+router.delete("/users/:userId/cart", authentication, authorization, deleteCart)
+
+//=====================order Api's=============================================
+
+router.post("/users/:userId/orders", authentication, authorization, createOrder)
+
+router.put("/users/:userId/orders", authentication, authorization, updateOrder)
 
 module.exports = router
