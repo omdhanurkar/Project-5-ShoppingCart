@@ -2,6 +2,8 @@ const orderModel = require("../models/orderModel")
 const cartModel = require("../models/cartModel")
 const check = require("../utility/validator")
 
+//===============================================Create Order================================================================
+
 const createOrder = async function (req, res) {
     try {
         let data = req.body;
@@ -18,7 +20,7 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, Message: 'Please provide a valid cart Id' })
         }
 
-        const cart = await cartModel.findOne({ userId })
+        const cart = await cartModel.findOne({ _id: cartId, userId: userId })
         if (!cart) {
             return res.status(404).send({ status: false, Message: 'cart not found by this user' })
         }
@@ -47,19 +49,21 @@ const createOrder = async function (req, res) {
         const Obj = { userId, items, totalPrice, totalItems, totalQuantity, cancellable }
 
         if (cart.items.length == 0) {
-            return res.status(200).send({ status: true, Message: 'ORDER ALREADY CREATED' })
+            return res.status(200).send({ status: true, Message: 'Order is already created' })
         }
 
         const createFinal = await orderModel.create(Obj)
 
         await cartModel.updateOne({ userId }, { items: [], totalPrice: 0, totalItems: 0 })
 
-        return res.status(201).send({ status: true, Message: 'ORDER SUCCESSFULLY CREATED', data: createFinal })
+        return res.status(201).send({ status: true, Message: 'Order created successfully', data: createFinal })
 
     } catch (error) {
         res.status(500).send({ status: false, Message: error.message })
     }
 }
+
+//===============================================Update Order================================================================
 
 const updateOrder = async function (req, res) {
     try {
@@ -85,7 +89,7 @@ const updateOrder = async function (req, res) {
             return res.status(400).send({ status: false, message: 'Status should be only "completed" or "cancelled"' })
         }
 
-        const cartId = await cartModel.findOne({ userId })
+        const cartId = await cartModel.findOne({ _id: cartId, userId: userId })
         if (!cartId) {
             return res.status(404).send({ status: false, message: `Cart does not exist for this Id ${userId}` })
         }

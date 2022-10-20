@@ -7,7 +7,7 @@ const authentication = (req, res, next) => {
     try {
         let token = req.headers["authorization"].split(' ')
         token = token[1]
-if(!token)  return res.status(400).send({status: false, message: "Token must be present, choose bearer token"})
+        if (!token) return res.status(400).send({ status: false, message: "Token must be present, choose bearer token" })
 
         jwt.verify(token, 'Project5-Group48', function (err, decode) {
             if (err) {

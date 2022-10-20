@@ -22,28 +22,23 @@ const createUser = async function (req, res) {
         if (!check.isValidname(lname)) { return res.status(400).send({ status: false, message: "Lname should be in Alphabets" }) };
 
         if (!email) { return res.status(400).send({ status: false, message: "email is mandatory" }) };
-        if (!check.isVAlidEmail(email)) { return res.status(400).send({ status: false, message: "Email should be valid" }) };        
+        if (!check.isVAlidEmail(email)) { return res.status(400).send({ status: false, message: "Email should be valid" }) };
         let checkEmail = await userModel.findOne({ email });
         if (checkEmail) return res.status(400).send({ status: false, message: "This email is already registered" });
 
         if (!password) { return res.status(400).send({ status: false, message: "Password is mandatory" }) };
         if (!check.isValidPassword(password)) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
-        const encryptedPassword = await bcrypt.hash(password, 10)
-        
+        const encryptedPassword = await bcrypt.hash(password, 10)     //salt round is used to make password more secured and by adding a string of 32 or more characters and then hashing them
+    
         if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
         if (!check.isValidPhone(phone)) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
         let checkPhone = await userModel.findOne({ phone });
         if (checkPhone) return res.status(400).send({ status: false, message: "This Phone is already registered" });
 
         if (files && files.length == 0)
-            return res
-                .status(400)
-                .send({ status: false, message: "Profile Image is required" });
+            return res.status(400).send({ status: false, message: "Profile Image is required" });
         else if (!check.isValidImage(files[0].originalname))
-            return res.status(400).send({
-                status: false,
-                message: "Profile Image is required as an Image format",
-            });
+            return res.status(400).send({status: false,message: "Profile Image is required as an Image format"});
         else data.profileImage = await uploadFile(files[0]);
 
         if (!address) return res.status(400).send({ status: false, message: "Address is mandatory" })
@@ -97,14 +92,14 @@ const userLogin = async function (req, res) {
         }
 
         // check password of existing user
-        let pass = await bcrypt.compare(password, user.password)
+        let pass = await bcrypt.compare(password, user.password)      //first parameter is the unhashed password and the second parameter is the hashed password stored in the db.
         if (!pass) return res.status(400).send({ status: false, message: "Password is not correct, Please provide valid password" });
 
         // using jwt for creating token
         let token = jwt.sign(
             {
                 userId: user._id.toString(),
-                exp: Math.floor(Date.now() / 1000) + (60 * 60),
+                exp: Math.floor(Date.now() / 1000) + (60 * 3600),      
                 iat: new Date().getTime()
             },
             "Project5-Group48"
@@ -146,12 +141,10 @@ const updateUser = async function (req, res) {
         let userId = req.params.userId
 
         let userdata = req.body
-        if(Object.keys(userdata).length == 0 && files == undefined) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
-
-        // if (!check.isValidValues(userdata) || Object.keys(req.files).length > 0) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+        if (Object.keys(userdata).length == 0 && files == undefined) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
 
         let { fname, lname, email, phone, password, address } = userdata;
-        
+
         const files = req.files
 
         if (!check.isValidname(fname)) {
@@ -178,7 +171,7 @@ const updateUser = async function (req, res) {
             if (!check.isValidPassword(password)) {
                 return res.status(400).send({ status: false, message: "Password is not valid " });
             }
-            password = await bcrypt.hash(password, saltRounds);
+            password = await bcrypt.hash(password, saltRounds);       //salt round is used to make password more secured and by adding a string of 32 or more characters and then hashing them
             userdata.password = password;
         }
 
@@ -195,7 +188,7 @@ const updateUser = async function (req, res) {
         }
 
         if (address) {
-            userdata.address = JSON.parse(userdata.address)
+            userdata.address = JSON.parse(userdata.address)      //JSON Parse converts the data in javascript object
 
             if (typeof userdata.address != "object") return res.status(400).send({ status: false, message: "Address should be in object format" })
             let { shipping, billing } = userdata.address
@@ -224,7 +217,7 @@ const updateUser = async function (req, res) {
         let updateUserData = await userModel.findOneAndUpdate({ _id: userId }, userdata, { new: true })
         res.status(200).send({ status: true, message: 'User profile updated', data: updateUserData })
 
-    }catch (error) {
+    } catch (error) {
         res.status(500).send({ status: false, message: error.message });
     }
 }

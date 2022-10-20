@@ -12,7 +12,7 @@ router.get("/test-me", function (req, res) {
     res.send("My first ever api!")
 })
 
-//=====================user Api's=================================================
+//=====================User Api's================================================
 
 router.post("/register", createUser)
 
@@ -22,7 +22,7 @@ router.get("/user/:userId/profile", authentication, authorization, getUser)
 
 router.put("/user/:userId/profile", authentication, authorization, updateUser)
 
-//=====================product Api's=============================================
+//=====================Product Api's=============================================
 
 router.post("/products", createProduct)
 
@@ -34,7 +34,7 @@ router.put("/products/:productId", updateProduct)
 
 router.delete("/products/:productId", ProductDeleteById)
 
-//=====================cart Api's=============================================
+//=====================Cart Api's=============================================
 
 router.post("/users/:userId/cart", authentication, authorization, createCart)
 
@@ -44,7 +44,7 @@ router.get("/users/:userId/cart", authentication, authorization, getCartById)
 
 router.delete("/users/:userId/cart", authentication, authorization, deleteCart)
 
-//=====================order Api's=============================================
+//=====================Order Api's=============================================
 
 router.post("/users/:userId/orders", authentication, authorization, createOrder)
 

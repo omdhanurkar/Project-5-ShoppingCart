@@ -10,7 +10,7 @@ const isValid = function (value) {
 //------------------------------- requestBody validation --------------------------------------------//
 
 const isValidRequestBody = function (body) {
-    return Object.keys(body).length>0
+    return Object.keys(body).length > 0
 }
 
 //------------------------------- ObjectId validation --------------------------------------------//
