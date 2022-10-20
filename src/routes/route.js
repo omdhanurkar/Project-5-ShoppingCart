@@ -20,7 +20,7 @@ router.post("/login", userLogin)
 
 router.get("/user/:userId/profile", authentication, authorization, getUser)
 
-router.put("/user/:userId/profile", authentication, authorization, updateUser)
+router.put("/user/:userId/profile", /*authentication, authorization,*/updateUser)
 
 //=====================Product Api's=============================================
 

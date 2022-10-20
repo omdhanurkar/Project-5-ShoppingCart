@@ -27,7 +27,7 @@ const createCart = async function (req, res) {
             }
 
             let createCart = await cartModel.create({ userId: userId, items: obj, totalPrice: product.price * obj.quantity, totalItems: 1 })
-            return res.status(201).send({ status: true, message: "Cart is successfully created", data: createCart })
+            return res.status(201).send({ status: true, message: "Success", data: createCart })
         }
 
         if (userCart) {
@@ -78,10 +78,10 @@ const createCart = async function (req, res) {
                         }
                     },
                     { new: true });
-                return res.status(200).send({ status: true, message: "product added successfully!", data: updateCart })
+                return res.status(201).send({ status: true, message: "Success", data: updateCart })
 
             }
-            return res.status(200).send({ status: true, data: updateCart })
+            return res.status(201).send({ status: true, message: "Success", data: updateCart })
         }
 
     } catch (err) {
@@ -146,7 +146,7 @@ const updateCart = async function (req, res) {
                 { $inc: { "items.$.quantity": -1, totalPrice: -product.price } },
                 { new: true })
 
-            return res.status(200).send({ status: true, message: "product quantity remove successfully", data: updateCart })
+            return res.status(200).send({ status: true, message: "Success", data: updateCart })
         }
 
         if (removeProduct == 0) {
@@ -165,18 +165,15 @@ const updateCart = async function (req, res) {
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i].productId == productId) {
                     productQuantity = arr[i].quantity
-
                 }
             }
-            console.log(productQuantity)
-
             let updatecart = await cartModel.findOneAndUpdate({ _id: cartId, userId: userId },
                 {
                     $pull: { items: { "productId": productId } },             //$pull will remove the entire object whenever condition is match
                     $inc: { totalItems: -1, totalPrice: -product.price * productQuantity }
                 }, { new: true })
 
-            return res.status(200).send({ status: true, data: updatecart })
+            return res.status(200).send({ status: true, message: `Success`, data: updatecart })
         }
     }
     catch (err) {
@@ -201,7 +198,7 @@ const getCartById = async function (req, res) {
 
         // get the product document from product collection using populate
         if (!cart) return res.status(400).send({ status: false, message: 'cart is not present for this user' })
-        return res.status(200).send({ status: true, message: 'card details', data: cart })
+        return res.status(200).send({ status: true, message: 'Success', data: cart })
 
     }
     catch (error) {

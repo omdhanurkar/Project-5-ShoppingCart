@@ -29,20 +29,27 @@ const createUser = async function (req, res) {
         if (!password) { return res.status(400).send({ status: false, message: "Password is mandatory" }) };
         if (!check.isValidPassword(password)) { return res.status(400).send({ status: false, message: "Password should be valid" }) };
         const encryptedPassword = await bcrypt.hash(password, 10)     //salt round is used to make password more secured and by adding a string of 32 or more characters and then hashing them
-    
+
         if (!phone) { return res.status(400).send({ status: false, message: "Phone is mandatory" }) };
         if (!check.isValidPhone(phone)) { return res.status(400).send({ status: false, message: "Phone should be valid" }) };
         let checkPhone = await userModel.findOne({ phone });
         if (checkPhone) return res.status(400).send({ status: false, message: "This Phone is already registered" });
 
+
         if (files && files.length == 0)
             return res.status(400).send({ status: false, message: "Profile Image is required" });
         else if (!check.isValidImage(files[0].originalname))
-            return res.status(400).send({status: false,message: "Profile Image is required as an Image format"});
+            return res.status(400).send({ status: false, message: "Profile Image is required as an Image format" });
         else data.profileImage = await uploadFile(files[0]);
 
+
         if (!address) return res.status(400).send({ status: false, message: "Address is mandatory" })
-        address = JSON.parse(data.address)
+
+        try {
+            address = JSON.parse(data.address)
+        } catch (error) {
+            return res.status(400).send({ status: false, message: "address in json format only" })
+        }
 
         if (!address.shipping) return res.status(400).send({ status: false, message: "shipping address is madatory" })
         if (!(address.shipping.street)) return res.status(400).send({ status: false, message: "shipping street is madatory" });
@@ -99,7 +106,7 @@ const userLogin = async function (req, res) {
         let token = jwt.sign(
             {
                 userId: user._id.toString(),
-                exp: Math.floor(Date.now() / 1000) + (60 * 3600),      
+                exp: Math.floor(Date.now() / 1000) + (60 * 3600),
                 iat: new Date().getTime()
             },
             "Project5-Group48"
@@ -139,13 +146,12 @@ const getUser = async function (req, res) {
 const updateUser = async function (req, res) {
     try {
         let userId = req.params.userId
-
+        const files = req.files
         let userdata = req.body
-        if (Object.keys(userdata).length == 0 && files == undefined) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
+
+        if(!check.isValidValues(userdata)||!check.isValidValues(files)) return res.status(400).send({ status:false, message:"please enter some data to update" })
 
         let { fname, lname, email, phone, password, address } = userdata;
-
-        const files = req.files
 
         if (!check.isValidname(fname)) {
             return res.status(400).send({ status: false, message: "Fname should be valid" })
@@ -188,7 +194,11 @@ const updateUser = async function (req, res) {
         }
 
         if (address) {
-            userdata.address = JSON.parse(userdata.address)      //JSON Parse converts the data in javascript object
+            try {
+                userdata.address = JSON.parse(userdata.address)   //JSON Parse converts the data in javascript object
+            } catch (error) {
+                return res.status(400).send({ status: false, message: "address in json format only" })
+            }
 
             if (typeof userdata.address != "object") return res.status(400).send({ status: false, message: "Address should be in object format" })
             let { shipping, billing } = userdata.address
@@ -215,7 +225,7 @@ const updateUser = async function (req, res) {
         }
 
         let updateUserData = await userModel.findOneAndUpdate({ _id: userId }, userdata, { new: true })
-        res.status(200).send({ status: true, message: 'User profile updated', data: updateUserData })
+        return res.status(200).send({ status: true, message: 'User profile updated', data: updateUserData })
 
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });

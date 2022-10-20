@@ -1,7 +1,6 @@
 const productModel = require("../models/productModel");
 const check = require("../utility/validator")
 const { uploadFile } = require("./awsController")
-const mongoose = require("mongoose")
 
 //==============================================Create Product========================================================================
 
