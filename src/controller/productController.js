@@ -106,8 +106,6 @@ const getProducts = async function (req, res) {
                 let sizes = queries.size.split(',')
                 let getbySize = await productModel.find({ isDeleted: false, availableSizes: { $in: sizes } })
                 return getbySize.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: getbySize })
-
-
             }
 
             if (queries.name) {
