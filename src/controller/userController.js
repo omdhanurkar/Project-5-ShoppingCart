@@ -149,9 +149,11 @@ const updateUser = async function (req, res) {
         const files = req.files
         let userdata = req.body
 
-        if(!check.isValidValues(userdata)||!check.isValidValues(files)) return res.status(400).send({ status:false, message:"please enter some data to update" })
+        if (Object.keys(userdata).length == 0 && files == undefined) { return res.status(400).send({ status: false, message: "please enter some data to update" }) }
 
         let { fname, lname, email, phone, password, address } = userdata;
+
+
 
         if (!check.isValidname(fname)) {
             return res.status(400).send({ status: false, message: "Fname should be valid" })
