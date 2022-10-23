@@ -37,6 +37,7 @@ const createUser = async function (req, res) {
 
 
         if (files && files.length == 0)
+
             return res.status(400).send({ status: false, message: "Profile Image is required" });
         else if (!check.isValidImage(files[0].originalname))
             return res.status(400).send({ status: false, message: "Profile Image is required as an Image format" });

@@ -44,7 +44,7 @@ const createProduct = async function (req, res) {
         if (image && image.length == 0)
             return res.status(400).send({ status: false, message: "Profile Image is required" });
         else if (!check.isValidImage(image[0].originalname))
-            return res.status(400).send({status: false, message: "Profile Image is required as an Image format"});
+            return res.status(400).send({ status: false, message: "Profile Image is required as an Image format" });
         else data.productImage = await uploadFile(image[0]);
 
         if (style) {
@@ -73,6 +73,7 @@ const createProduct = async function (req, res) {
     }
 }
 
+
 //==============================================Get product==========================================================
 
 const getProducts = async function (req, res) {
@@ -80,7 +81,8 @@ const getProducts = async function (req, res) {
         let queries = req.query;
 
         let getProducts = await productModel.find({ isDeleted: false })
-        if (Object.keys(queries).length == 0) return res.status(200).send({ status: true, message: "enter some some data for get product" })
+        //if (Object.keys(queries).length == 0) return res.status(200).send({ status: true, message: "enter some some data for get product" })
+
 
         if (getProducts.length == 0) {
             return res.status(404).send({ status: false, message: "No product found" })
@@ -129,6 +131,7 @@ const getProducts = async function (req, res) {
                 return pricesort.length == 0 ? res.status(404).send({ status: false, message: "No product found" }) : res.status(200).send({ status: true, message: "Success", data: pricesort })
             }
         }
+        return res.status(200).send({ status: false, message: "Success", data: getProducts })
 
     } catch (error) {
         res.status(500).send({ status: false, error: error.message });

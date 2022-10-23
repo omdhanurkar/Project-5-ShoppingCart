@@ -1,7 +1,6 @@
 const orderModel = require("../models/orderModel")
 const cartModel = require("../models/cartModel")
 const check = require("../utility/validator")
-const userModel = require("../models/userModel")
 
 //===============================================Create Order================================================================
 
